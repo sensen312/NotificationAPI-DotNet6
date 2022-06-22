@@ -20,9 +20,6 @@ namespace NotificationAPI.Entities
         public DateTime? SentDate { get; set; }
         public DateTime? RecievedDate { get; set; }
 
-        //public Notification(Guid notificationId)
-        //{
-        //    NotificationId = notificationId;
-        //}
+      
     }
 }

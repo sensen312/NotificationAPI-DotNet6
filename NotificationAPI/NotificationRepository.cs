@@ -1,39 +1,28 @@
 ﻿using NotificationAPI.Entities;
 using System.Data;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
 namespace NotificationAPI
 {
     public class NotificationRepository : INotificationRepository
     {
-        private static SqlConnection GetConnection()
+        private readonly string _connectionString;
+
+        public NotificationRepository(string connectionString)
         {
-            return new SqlConnection("Server=(local);Database=NotificationDatabase;Trusted_Connection=true;");
+            _connectionString = connectionString;
         }
 
-        //public void CreateTable()
-        //{
-        //    var sql = "CREATE TABLE Notifications (" +
-        //        "NotificationId UNIQUEIDENTIFIER NOT NULL, " +
-        //        "RecievedDate DATETIME2, " +
-        //        "SentDate DATETIME2, " +
-        //        "DeviceId varchar(255) NOT NULL, " +
-        //        "UserId varchar(255) NOT NULL, " +
-        //        "ApplicationName varchar(255) NOT NULL, " +
-        //        "CONSTRAINT PK_NotificationTracker PRIMARY KEY(NotificationId))	";
-        //    using (var connection = GetConnection())
-        //    using (var command = new SqlCommand(sql, connection))
-        //    {
-        //        command.CommandType = CommandType.Text;
-        //        connection.Open();
-        //        var rowsInserted = command.ExecuteNonQuery();
-        //    }
-        //}
-       
+        private SqlConnection GetConnection()
+        {
+            return new SqlConnection(_connectionString); 
+        }
+
+
+    
         public async Task AddNotificationAsync(Notification notification)
         {
-            // how do I fix the async?
-            // where do I put the await 
             var sql = "INSERT INTO Notifications(NotificationId, SentDate, DeviceId, UserId, ApplicationName) VALUES (@NotificationId, @SentDate, @DeviceId, @UserId, @ApplicationName)";
             using (var connection = GetConnection())
             using (var command = new SqlCommand(sql, connection))
@@ -46,10 +35,9 @@ namespace NotificationAPI
                 command.Parameters.AddWithValue("@ApplicationName", notification.ApplicationName);
 
                 connection.Open();
-                var rowsInserted = command.ExecuteNonQuery();
+                var rowsInserted = await command.ExecuteNonQueryAsync();
             }
             
-            // do I need to save to async?
         }
     
 
@@ -64,16 +52,12 @@ namespace NotificationAPI
                 command.Parameters.AddWithValue("@RecievedDate", notification.RecievedDate);
               
                 connection.Open();
-                var rowsInserted = command.ExecuteNonQuery();
+                var rowsInserted = await command.ExecuteNonQueryAsync();
 
-                // makes sure that we know how many notifications were updated
-                // I don't know if we should check if there is more than one notification updated 
-                // since in theory that shouldn't be possible or should we even care?
+
                 return rowsInserted;
                 
             }
         }
-       
-        
     }
 }
